@@ -37,14 +37,19 @@ def get_or_create_game(email: str):
     """Retrieves existing game or creates a new game."""
     with sqlite3.connect(DB_PATH) as con:
         cursor = con.cursor()
-        cursor.execute("SELECT board, status FROM games WHERE player_email = ?", (email))
+        # Trailing comma (email,) makes this a single-element tuple
+        cursor.execute("SELECT board, status FROM games WHERE player_email = ?", (email,))
         row = cursor.fetchone()
 
         if not row or row[1] != 'ACTIVE':
-            cursor.execute("SELECT board, status FROM games WHERE player_email = ?")
+            cursor.execute(
+                "INSERT OR REPLACE INTO games (player_email, board, status) VALUES (?, '_________', 'ACTIVE')",
+                (email,)
+            )
             con.commit()
-            return "_________", "ACTIVE:"
+            return "_________", "ACTIVE"
         return row[0], row[1]
+
 def update_game(email: str, board: str, status: str = 'ACTIVE'):
     """Update board states in db"""
     with sqlite3.connect(DB_PATH) as con:
@@ -67,8 +72,8 @@ def check_winner(board: str):
     for combo in WIN_COMBOS:
         if board[combo[0]] == board[combo[1]] == board[combo[2]] != '_':
             return board[combo[0]]
-        if '_' not in board:
-            return 'DRAW'
+    if '_' not in board:
+        return 'DRAW'
     return None
 
 def format_board(board: str):
@@ -227,7 +232,7 @@ async def handle_email_webhook(request: Request):
     winner = check_winner(board)
     if winner =='O':
         update_game(sender, board, status="LOST")
-        msg = f"The bot won!\n\n{format_board}\n\nReply with a move to start a new game"
+        msg = f"The bot won!\n\n{format_board(board)}\n\nReply with a move to start a new game"
         await send_email_reply(sender, subject, msg, message_id)
 
         print(f"user lost, sent email:\n{msg}")
@@ -244,6 +249,6 @@ async def handle_email_webhook(request: Request):
     )
     await send_email_reply(sender, subject, reply_msg, message_id)
 
-    print(f"user's turn, sent email:\n{msg}") 
+    print(f"user's turn, sent email:\n{reply_msg}") 
     return {"status": "success"}
 
