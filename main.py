@@ -179,7 +179,7 @@ async def handle_email_webhook(request: Request):
         )
         await send_email_reply(sender, subject, reply_msg, message_id)
 
-        print(f"No valid move found, send email:\n{reply_msg}")
+        print(f"No valid move found, sent email:\n{reply_msg}")
         return {"status": "success"}
 
     # If move found:
@@ -191,6 +191,8 @@ async def handle_email_webhook(request: Request):
     if board[idx] != "_":
         reply_msg = f"Position {user_move} is already taken!\n\n{format_board(board)}"
         await send_email_reply(sender, subject, reply_msg, message_id)
+
+        print(f"Move placed invalidly, sent email:\n{reply_msg}")
         return {"status": "success"}
 
     # If move is palced in valid spot, place it
@@ -204,11 +206,15 @@ async def handle_email_webhook(request: Request):
         update_game(sender, board, status="WON")
         msg = f"Congats! You won!\n\n{format_board(board)}\n\nReply with a move to start a new game"
         await send_email_reply(sender, subject, msg, message_id)
+
+        print(f"user won, sent email:\n{msg}")
         return {"status": "success"}
     if winner == 'DRAW':
-        update_game(sender, board, status="LOST")
+        update_game(sender, board, status="DRAW")
         msg = f"It's a draw!\n\n{format_board(board)}\n\nReply with a move to start a new game"
         await send_email_reply(sender, subject, msg, message_id)
+
+        print(f"user tied, sent email:\n{msg}")
         return {"status": "success"}
 
     # Random bot move at an empty index
@@ -223,6 +229,8 @@ async def handle_email_webhook(request: Request):
         update_game(sender, board, status="LOST")
         msg = f"The bot won!\n\n{format_board}\n\nReply with a move to start a new game"
         await send_email_reply(sender, subject, msg, message_id)
+
+        print(f"user lost, sent email:\n{msg}")
         return {"status": "success"}
 
     # Save state and reply with updated board
@@ -236,5 +244,6 @@ async def handle_email_webhook(request: Request):
     )
     await send_email_reply(sender, subject, reply_msg, message_id)
 
+    print(f"user's turn, sent email:\n{msg}") 
     return {"status": "success"}
 
