@@ -93,8 +93,23 @@ async def handle_email_webhook(request: Request):
     if has_move:
         move = has_move.group(1).upper()
         print(f"Valid move at {move}")
+
+        reply_text = (
+            f"Got move: {move}!\n\n"
+            f"---------------\n"
+            f"[board]"
+            f"---------------\n"
+        )
+        await send_email_reply(sender, subject, reply_text)
     else:
         print("No valid move in body")
+        reply_text = (
+            f"ERROR: Didn't recieve move\n\n"
+            f"---------------\n"
+            f"[board]"
+            f"---------------\n"
+        )
+        await send_email_reply(sender, subject, reply_text)
 
     return {"status": "success"}
     
