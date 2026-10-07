@@ -9,12 +9,50 @@ app = FastAPI()
 # Get api key from local environment variable
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 
+# Email that replies to messages 
+SENDER = "games@games.jackjacobson2011.com"
+
+async def send_email_reply(to_address: str, subject: str, text_content: str):
+    """Sneds outbound email reply w/ Resend API"""
+    if not RESEND_API_KEY:
+        print("Didn't get API key from environment")
+        return
+
+    # Add re to subject if not already existing
+    if subject.lower().startswith("re:"):
+        reply_subject = subject
+    else:
+        reply_subject = f"Re: {subject}"
+
+    # Send with Resend API
+    # Can someone please tell me who JSON is?!??!?
+    async with httpx.AsyncClient() as client:
+        res = await client.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "from": SENDER,
+                "to": [to_address],
+                "subject": reply_subject,
+                "text": text_content
+            },
+        )
+
+        if res.status_code == 200:
+            print(f"Reply sent to {to_address}")
+        else:
+            print(f'Failed to send reply, HTTP {res.status_code}: {res.text}')
+    
+
 # Health check
 @app.get("/")
 async def health_check():
     return{"status":"ok"}
 
-# Set up POST request 
+# POST API call when email is forwared from ReSend
 @app.post("/api/webhook/email")
 async def handle_email_webhook(request: Request):
     payload = await request.json()
