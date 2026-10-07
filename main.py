@@ -80,7 +80,7 @@ def format_board(board: str):
     """Format string board into ASCII grid"""
     b = [cell if cell != "_" else "." for cell in board]
     return (
-        f" 1 2 3\n"
+        f"   1   2   3\n"
         f"A {b[0]} | {b[1]} | {b[2]}\n"
         f" ---+---+---\n"
         f"B {b[3]} | {b[4]} | {b[5]}\n"
