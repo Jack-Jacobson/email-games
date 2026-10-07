@@ -4,6 +4,11 @@ from fastapi import FastAPI, Request
 # Define API
 app = FastAPI()
 
+# Health check
+@app.get("/")
+async def health_check():
+    return{"status":"ok"}
+
 # Set up POST request 
 @app.post("/api/webhook/email")
 async def handle_email_webhook(request: Request):
