@@ -12,7 +12,7 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 # Email that replies to messages 
 SENDER = "games@games.jackjacobson2011.com"
 
-async def send_email_reply(to_address: str, subject: str, text_content: str):
+async def send_email_reply(to_address: str, subject: str, text_content: str, message_id:str = None):
     """Sneds outbound email reply w/ Resend API"""
     if not RESEND_API_KEY:
         print("Didn't get API key from environment")
@@ -23,6 +23,9 @@ async def send_email_reply(to_address: str, subject: str, text_content: str):
         reply_subject = subject
     else:
         reply_subject = f"Re: {subject}"
+    headers = {}
+    if message_id:
+        headers["In-Reply-To"] = message_id
 
     # Send with Resend API
     # Can someone please tell me who JSON is?!??!?
@@ -37,7 +40,8 @@ async def send_email_reply(to_address: str, subject: str, text_content: str):
                 "from": SENDER,
                 "to": [to_address],
                 "subject": reply_subject,
-                "text": text_content
+                "text": text_content,
+                "headers": headers
             },
         )
 
