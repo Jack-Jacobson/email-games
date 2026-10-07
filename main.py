@@ -1,6 +1,8 @@
 import re
 import os
 import httpx
+import sqlite3
+import random
 from fastapi import FastAPI, Request
 
 # Define API
@@ -11,6 +13,44 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 
 # Email that replies to messages 
 SENDER = "games@games.jackjacobson2011.com"
+
+# Database path from main.py
+DB_PATH = "games.db"
+
+# Setup database file with sqlite
+def init_db():
+    """Initialize SQLite databse for storing games"""
+    with sqlite3.connect(DB_PATH) as con:
+        con.execute("""
+            CREATE TABLE IF NOT EXISTS games (
+                player_email TEXT PRIMARY KEY,
+                board TEXT DEFAULT '_______',
+                status TEXT DEFAULT 'ACTIVE'
+            )
+        """)
+        con.commit()
+
+init_db()
+
+# Manage boards within the DB file
+def get_or_create_game(email: str):
+    """Retrieves existing game or creates a new game."""
+    with sqlite3.connect(DB_PATH) as con:
+        cursor = con.cursor()
+        cursor.execute("SELECT board, status FROM games WHERE player_email = ?", (email))
+        row = cursor.fetchone()
+
+        if not row or row[1] != 'ACTIVE':
+            cursor.execute("SELECT board, status FROM games WHERE player_email = ?")
+            con.commit()
+            return "_______", "ACTIVE:"
+        return row[0], row[1]
+def update_game(email: str, board: str, status: str = 'ACTIVE'):
+    """Update board states in db"""
+    with sqlite3.connect(DB_PATH) as con:
+        con.execute("UPDATE games SET board = ?, status = ? WHERE player_email = ?", (board, status, email))
+        con.commit()
+
 
 async def send_email_reply(to_address: str, subject: str, text_content: str, message_id:str = None):
     """Sneds outbound email reply w/ Resend API"""
