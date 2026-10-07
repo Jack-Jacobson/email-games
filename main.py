@@ -15,7 +15,11 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 SENDER = "games@games.jackjacobson2011.com"
 
 # Database path from main.py
-DB_PATH = "games.db"
+DATA_DIR = "/app/data"
+os.makedirs(DATA_DIR, exist_ok=True)
+
+DB_PATH = os.path.join(DATA_DIR, "games.db")
+
 
 # Setup database file with sqlite
 def init_db():
@@ -80,12 +84,12 @@ def format_board(board: str):
     """Format string board into ASCII grid"""
     b = [cell if cell != "_" else "." for cell in board]
     return (
-        f"   1   2   3\n"
-        f"A {b[0]} | {b[1]} | {b[2]}\n"
-        f" ---+---+---\n"
-        f"B {b[3]} | {b[4]} | {b[5]}\n"
-        f" ---+---+---\n"
-        f"C {b[6]} | {b[7]} | {b[8]}\n"
+        f"      1   2   3\n"
+        f"A    {b[0]} | {b[1]} | {b[2]}\n"
+        f"    ---+---+---\n"
+        f"B    {b[3]} | {b[4]} | {b[5]}\n"
+        f"    ---+---+---\n"
+        f"C    {b[6]} | {b[7]} | {b[8]}\n"
     )
     
 
