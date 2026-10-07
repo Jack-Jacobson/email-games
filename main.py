@@ -26,7 +26,7 @@ async def handle_email_webhook(request: Request):
     email_id = data.get("email_id")
 
     # Print payload to conssole
-    print(f'GOT EMAIL from "{sender}" with subject "{subject} and id {email_id}"')
+    print(f'GOT EMAIL from "{sender}" with subject "{subject}" and id "{email_id}"')
 
     body = ""
 
