@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Game Stats Dashboard | Jack Jacobson</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <a href="https://jackjacobson2011.com" target="_blank" rel="noopener noreferrer">Portfolio</a>
+        <a href="https://genericos.jackjacobson2011.com" target="_blank" rel="noopener noreferrer">
+            GenericOS <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-left: 3px; opacity: 0.8;"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+        </a>
+        <a href="https://openatlas.jackjacobson2011.com/about" target="_blank" rel="noopener noreferrer">
+            OpenAtlas <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-left: 3px; opacity: 0.8;"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
+        </a>
+    </header>
+    
+    <div class="container">
+        <div class="hero">
+            <h1>Email Tic-Tac-Toe</h1>
+            <p>Send your move coordinates (e.g. <code>A1</code>, <code>C3</code>) to <a href="mailto:games@games.jackjacobson2011.com" class="accent-link">games@games.jackjacobson2011.com</a> to start or continue a game!</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Players</h3>
+                <p id="total-players">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Games Completed</h3>
+                <p id="total-games">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Player Victories</h3>
+                <p id="total-wins" class="stat-accent">0</p>
+            </div>
+        </div>
+
+        <section class="dashboard-card">
+            <div class="card-header">
+                <h3>Leaderboard</h3>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Wins</th>
+                            <th>Losses</th>
+                            <th>Draws</th>
+                            <th>Total Games</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <tr>
+                            <td colspan="6" class="loading">Loading stats...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <div class="contact-section">
+            <a href="https://github.com/Jack-Jacobson" target="_blank">GitHub</a>
+            <a href="mailto:jack@jackjacobson2011.com">Email Me</a>
+            <a href="https://www.instagram.com/80550a_pirates/" target="_blank">Robotics Instagram</a>
+            <a href="https://stardance.hackclub.com/@Jack_/projects" target="_blank">Hack Club</a>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,232 @@
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    margin: 0; 
+    padding: 0; 
+    background-color: #121212; 
+    /* Dark geometric triangle pattern from portfolio */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='140' viewBox='0 0 80 140'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill-opacity='0.8'%3E%3Cpath fill='%23171717' d='M0 0l40 70L0 140z'/%3E%3Cpath fill='%23141414' d='M80 0L40 70l40 70z'/%3E%3Cpath fill='%23111111' d='M0 0h80L40 70z'/%3E%3Cpath fill='%231a1a1a' d='M0 140h80L40 70z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-attachment: fixed;
+    color: #e0e0e0; 
+}
+
+/* Navigation */
+header { 
+    display: flex; 
+    justify-content: flex-end; 
+    padding: 2rem 3rem; 
+    gap: 2rem; 
+    flex-wrap: wrap; 
+}
+
+header a { 
+    color: #888; 
+    text-decoration: none; 
+    font-size: 0.9rem; 
+    text-transform: uppercase; 
+    letter-spacing: 1px; 
+    transition: color 0.3s; 
+    display: flex; 
+    align-items: center; 
+}
+
+header a:hover { 
+    color: #ffffff; 
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 3rem 4rem 3rem;
+}
+
+.hero {
+    text-align: center;
+    margin-bottom: 3.5rem;
+}
+
+.hero h1 {
+    font-size: 3rem;
+    font-weight: 300;
+    color: #fff;
+    margin: 0 0 0.5rem 0;
+}
+
+.hero h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #00bcd4;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin: 0 0 1.5rem 0;
+}
+
+.hero p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #bbbbbb;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.accent-link {
+    color: #00bcd4;
+    text-decoration:none;
+    font-weight: bold;
+}
+
+.accent-link:hover {
+    text-decoration: underline;
+}
+
+code {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #00bcd4;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    border-left: 2px solid #00bcd4;
+    padding: 1.25rem;
+    text-align: center;
+}
+
+.stat-card h3 {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.stat-card p {
+    margin: 0.5rem 0 0 0;
+    font-size: 2rem;
+    font-weight: 300;
+    color: #ffffff;
+}
+
+.stat-card p.start-accent {
+    color: #00bcd4;
+}
+
+.dashboard-card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #333;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 300;
+    color: #00bcd4;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #aaaaaa;
+}
+
+th, td {
+    padding: 1rem 1.5rem;
+    text-align: left;
+}
+
+th {
+    background: #141414;
+    color: #888;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #333;
+}
+
+tr:not(:last-child) td {
+    border-bottom: 1px solid #262626;
+}
+
+tr:hover td {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.stat-win {
+    color: #00bcd4;
+    font-weight: bold;
+}
+
+.stat-loss {
+    color: #888888;
+}
+
+.loading {
+    text-align: center;
+    color: #888;
+    padding: 2rem;
+}
+
+.contact-section { 
+    margin-top: 4rem; 
+    padding-top: 2rem; 
+    border-top: 1px solid #333; 
+    display: flex; 
+    justify-content: center; 
+    gap: 2rem; 
+    flex-wrap: wrap;
+}
+
+.contact-section a { 
+    color: #00bcd4; 
+    text-decoration: none; 
+    font-weight: bold; 
+}
+
+.contact-section a:hover { 
+    text-decoration: underline; 
+}
+
+@media (max-width: 600px) {
+    header {
+        justify-content: center;  
+        padding: 1.5rem 1rem;    
+        gap: 1rem 1.25rem;       
+    }
+    header a {
+        font-size: 0.8rem;      
+    }
+    .container {
+        padding: 1.5rem 1rem 3rem 1rem;
+    }
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+    th, td {
+        padding: 0.75rem 1rem;
+    }
+}
