@@ -230,3 +230,35 @@ tr:hover td {
         padding: 0.75rem 1rem;
     }
 }
+
+.tab-container {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.tab-btn {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #888;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    color: #fff;
+    border-color: #00bcd4;
+}
+
+.tab-btn.active {
+    background: #00bcd4;
+    color: #121212;
+    border-color: #00bcd4;
+}

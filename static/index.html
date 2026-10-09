@@ -19,8 +19,15 @@
     
     <div class="container">
         <div class="hero">
-            <h1>Email Tic-Tac-Toe</h1>
-            <p>Send your move coordinates (e.g. <code>A1</code>, <code>C3</code>) to <a href="mailto:games@games.jackjacobson2011.com" class="accent-link">games@games.jackjacobson2011.com</a> to start or continue a game!</p>
+            <h1>Play-by-Email Arcade</h1>
+            <p>Send moves to <a href="mailto:games@games.jackjacobson2011.com" class="accent-link">games@games.jackjacobson2011.com</a>!</p>
+            <p style="font-size: 0.9rem; color: #888; margin-top: 0.5rem;">For Minesweeper, include <code>Minesweeper</code> in the subject or message.</p>
+        </div>
+
+        <!-- Game Selector Tabs -->
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchGame('tictactoe')">Tic-Tac-Toe</button>
+            <button class="tab-btn" onclick="switchGame('minesweeper')">Minesweeper</button>
         </div>
 
         <div class="stats-grid">
@@ -40,12 +47,12 @@
 
         <section class="dashboard-card">
             <div class="card-header">
-                <h3>Leaderboard</h3>
+                <h3 id="leaderboard-title">Tic-Tac-Toe Leaderboard</h3>
             </div>
             <div class="table-container">
                 <table>
                     <thead>
-                        <tr>
+                        <tr id="table-header-row">
                             <th>Rank</th>
                             <th>Player</th>
                             <th>Wins</th>
@@ -62,6 +69,7 @@
                 </table>
             </div>
         </section>
+
         <div class="contact-section">
             <a href="https://github.com/Jack-Jacobson" target="_blank">GitHub</a>
             <a href="mailto:jack@jackjacobson2011.com">Email Me</a>
