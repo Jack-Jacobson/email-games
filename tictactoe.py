@@ -5,14 +5,21 @@ import random
 
 DATA_DIR = "/app/data"
 os.makedirs(DATA_DIR, exist_ok=True)
-
 DB_PATH = os.path.join(DATA_DIR, "games.db")
+
+RESET_DB = os.environ.get("RESET_DB", "false").lower() == "true"
 
 
 # Setup database file with sqlite
 def init_db():
     """Initialize SQLite databse for storing games"""
     with sqlite3.connect(DB_PATH) as con:
+
+        if RESET_DB:
+            con.execute("DROP TABLE IF EXISTS games")
+            con.execute("DROP TABLE IF EXISTS stats")
+            con.commit()
+            
         con.execute("""
             CREATE TABLE IF NOT EXISTS games (
                 player_email TEXT PRIMARY KEY,
