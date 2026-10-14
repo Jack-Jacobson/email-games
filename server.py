@@ -92,6 +92,23 @@ async def handle_email_webhook(request: Request):
 
     print(f"BODY:\n{body}")
 
+    is_reply = bool(re.match(r"^re:\s*", subject, re.IGNORECASE))
+    clean_subject = re.sub(r"^re:\s*", "", subject, flags = re.IGNORECASE).strip()
+
+    is_no_subject = not is_reply and (not subject or subject.strip() == "" or subject.lower() == "no subject found")
+
+    if is_no_subject:
+        print("Email recieved with no subject - sending welcome")
+        reply_msg = (
+            f"Welcome to Email Games!!\n"
+            f"Your email did not include a valid subject line, include one of the below subjects to play!\n"
+            f"How to play:\n"
+            f"- Tic Tac Toe: put 'Tic-Tac-Toe' in your subject and reply with coordinates A1-C3 (e.g. A3, C1)\n"
+            f"- Minesweeper: put 'Minesweeper' in your subject and reply with coordinates A1-E5 or 'FLAG [COORD]'.\n"
+        )
+        await send_email_reply(sender, subject, reply_msg, message_id)
+        return {"status": "success"}
+
     # Determine game choice from Subject, Body, or Move Coordinates
     is_minesweeper = (
         bool(re.search(r"\b(mine|minesweeper|ms)\b", subject, re.IGNORECASE)) or
@@ -100,13 +117,13 @@ async def handle_email_webhook(request: Request):
     )
 
     if is_minesweeper:
-        print("🎮 Routing to Minesweeper Engine")
+        print("Using minesweeper logic")
         reply_msg = minesweeper.process_ms_move(sender, body)
         await send_email_reply(sender, subject, reply_msg, message_id)
         return {"status": "success"}
 
     # Default to Tic-Tac-Toe
-    print("Running Tic Tac Toe!")
+    print("Using tic tac toe logic")
     has_move = re.search(r"\b([A-Ca-c][1-3])\b", body)
     board, status = tictactoe.get_or_create_game(sender)
 
