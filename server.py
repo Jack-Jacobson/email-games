@@ -37,8 +37,8 @@ async def send_email_reply(to_address: str, subject: str, text_content: str, mes
 
     unique_id = str(int(time.time() * 1000))
     escaped_lines = [
-        html.escape(line)+ f'<span style ="display:none">{unique_id}-{i}</spain>' 
-        for i, line in enumerate(clean_text.splitliness())
+        html.escape(line) + f'<span style="display:none">{unique_id}-{i}</span>'
+        for i, line in enumerate(clean_text.splitlines())
     ]
     html_body = "\n".join(escaped_lines)
 
