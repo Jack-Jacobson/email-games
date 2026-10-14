@@ -10,7 +10,7 @@ import tictactoe
 import minesweeper
 
 app = FastAPI()
-
+# tests
 os.makedirs("static", exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
