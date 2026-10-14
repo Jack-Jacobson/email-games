@@ -150,10 +150,10 @@ def format_ms_board(state: str, reveal_all_mines: bool = False, mines: str = "")
         row_str += "|".join(cells)
         rows_text.append(row_str)
 
-        divider = "\n    ---+---+---+---+---\n"
-        board_ascii = header + divider.join(rows_text) + "\n"
+    divider = "\n    ---+---+---+---+---\n"
+    board_ascii = header + divider.join(rows_text) + "\n"
 
-        return f"```\n{board_ascii}```"
+    return f"```\n{board_ascii}```"
 
 def count_adjacent_mines(idx: int, mines: str):
     """Count adjacent mines for a given cell."""
