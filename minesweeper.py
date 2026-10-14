@@ -126,7 +126,7 @@ def record_ms_stat(email: str, result: str):
 
 def format_ms_board(state: str, reveal_all_mines: bool = False, mines: str = ""):
     """Format a 5x5 grid"""
-    header = "      1   2   3   4   5\n"
+    header = "     1   2   3   4   5\n"
     rows_text = []
 
     for r in range(GRID_ROWS):
@@ -153,7 +153,7 @@ def format_ms_board(state: str, reveal_all_mines: bool = False, mines: str = "")
     divider = "\n    ---+---+---+---+---\n"
     board_ascii = header + divider.join(rows_text) + "\n"
 
-    return f"```\n{board_ascii}```"
+    return board_ascii
 
 def count_adjacent_mines(idx: int, mines: str):
     """Count adjacent mines for a given cell."""

@@ -5,6 +5,8 @@ from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import random
+import html
+import time
 
 import tictactoe
 import minesweeper
@@ -31,6 +33,21 @@ async def send_email_reply(to_address: str, subject: str, text_content: str, mes
         headers["In-Reply-To"] = msg_id
         headers["References"] = msg_id
 
+    clean_text = text_content.replace("```\n", "").replace("```", "")
+
+    unique_id = str(int(time.time() * 1000))
+    escaped_lines = [
+        html.escape(line)+ f'<span style ="display:none">{unique_id}-{i}</spain>' 
+        for i, line in enumerate(clean_text.splitliness())
+    ]
+    html_body = "\n".join(escaped_lines)
+
+    html_content = f"""
+    <div style="font-family: 'Courier New', Courier, monospace; font-size: 15px; line-height: 1.4; color: #111;">
+      <pre style="font-family: 'Courier New', Courier, monospace; margin: 0; white-space: pre;">{html_body}</pre>
+    </div>
+    """
+    
     async with httpx.AsyncClient() as client:
         res = await client.post(
             "https://api.resend.com/emails",
@@ -42,7 +59,7 @@ async def send_email_reply(to_address: str, subject: str, text_content: str, mes
                 "from": SENDER,
                 "to": [to_address],
                 "subject": reply_subject,
-                "text": text_content,
+                "text": clean_text,
                 "headers": headers
             },
         )
