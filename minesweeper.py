@@ -133,7 +133,7 @@ def format_ms_board(state: str, reveal_all_mines: bool = False, mines: str = "")
         row_str = f"{ROW_LABELS[r]}   "
         cells = []
         for c in range(GRID_COLS):
-            idx = r* GRID_COLS + char = state[idx]
+            idx = r* GRID_COLS + c
             char = state[idx]
 
             if reveal_all_mines and mines and mines[idx] == "1":
