@@ -121,7 +121,7 @@ async def handle_email_webhook(request: Request):
                 email_detail = res.json()
                 body = email_detail.get("text") or email_detail.get("html") or "No body received"
     body = extract_latest_reply(body)
-    
+
     print(f"BODY:\n{body}")
 
     is_reply = bool(re.match(r"^re:\s*", subject, re.IGNORECASE))
@@ -153,9 +153,30 @@ async def handle_email_webhook(request: Request):
         reply_msg = minesweeper.process_ms_move(sender, body)
         await send_email_reply(sender, subject, reply_msg, message_id)
         return {"status": "success"}
-
+    
     # Default to Tic-Tac-Toe
     print("Using tic tac toe logic")
+
+    level_match = re.search(r"\b(?:LEVEL\s*([1-3])|(EASY|MEDIUM|HARD))\b", body, re.IGNORECASE)
+    if level_match:
+        if level_match.group(1):
+            difficulty = int(level_match.group(1))
+        else:
+            word = level_match.group(2).upper()
+            difficulty = {"EASY": 1, "MEDIUM": 2, "HARD": 3}[word]
+
+        # Reset board with new difficulty if no coordinate move was included
+        tictactoe.update_game(sender, "_________", status="ACTIVE", difficulty=difficulty)
+        board = "_________"
+        if not has_move:
+            reply_msg = (
+                f"Tic-Tac-Toe difficulty set to Level {difficulty}!\n\n"
+                f"{tictactoe.format_board(board)}\n"
+                f"Reply with coordinates (A1-C3) to make your first move."
+            )
+            await send_email_reply(sender, subject, reply_msg, message_id)
+            return {"status": "success"}
+        
     has_move = re.search(r"\b([A-Ca-c][1-3])\b", body)
     board, status = tictactoe.get_or_create_game(sender)
 
@@ -197,7 +218,7 @@ async def handle_email_webhook(request: Request):
         return {"status": "success"}
 
     empty_indexes = [i for i, char in enumerate(board) if char == "_"]
-    bot_index = random.choice(empty_indexes)
+    bot_index = tictactoe.get_bot_move(board, difficulty)
     board_list[bot_index] = 'O'
     board = "".join(board_list)
 
