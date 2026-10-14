@@ -106,7 +106,7 @@ async def handle_email_webhook(request: Request):
         return {"status": "success"}
 
     # Default to Tic-Tac-Toe
-    print("🎮 Routing to Tic-Tac-Toe Engine")
+    print("Running Tic Tac Toe!")
     has_move = re.search(r"\b([A-Ca-c][1-3])\b", body)
     board, status = tictactoe.get_or_create_game(sender)
 
