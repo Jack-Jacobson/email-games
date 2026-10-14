@@ -233,7 +233,7 @@ def process_ms_move(email: str, body_text: str) -> str:
         update_ms_game(email, mines, state, status="LOST", first_move=0)
         record_ms_stat(email, "LOST")
         final_board = format_ms_board(state, reveal_all_mines=True, mines=mines)
-        return f"💥 BOOM! You hit a mine at {coord}!\n\n{final_board}\nReply 'NEW' to play again."
+        return f"You hit a mine at {coord}!\n\n{final_board}\nReply 'NEW' to play again."
 
     cascade_reveal(idx, state_list, mines)
     new_state = "".join(state_list)
@@ -246,7 +246,7 @@ def process_ms_move(email: str, body_text: str) -> str:
     if unrevealed_non_mines == 0:
         update_ms_game(email, mines, new_state, status="WON", first_move=0)
         record_ms_stat(email, "WON")
-        return f"🎉 You cleared all the mines! YOU WIN!\n\n{format_ms_board(new_state)}\nReply 'NEW' to play again."
+        return f"You cleared all the mines! YOU WIN!\n\n{format_ms_board(new_state)}\nReply 'NEW' to play again."
 
     update_ms_game(email, mines, new_state, status="ACTIVE", first_move=0)
     return f"Revealed {coord}.\n\n{format_ms_board(new_state)}"

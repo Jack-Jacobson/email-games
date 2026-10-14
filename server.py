@@ -19,6 +19,20 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 SENDER = "games@games.jackjacobson2011.com"
 
+def extract_latest_reply(body: str):
+    """Returns only user's new reply"""
+    lines = []
+    for line in body.splitlines():
+        stripped = line.strip()
+        if stripped.startswith(">"):
+            break
+        if re.match(r"^On .* wrote:$", stripped, re.IGNORECASE):
+            break
+        if stripped.startswith("From:") or stripped.startswith("-----Original Message"):
+            break
+        lines.append(line)
+    return "\n".join(lines).strip()
+
 
 async def send_email_reply(to_address: str, subject: str, text_content: str, message_id: str = None):
     """Sends outbound email reply w/ Resend API."""
@@ -106,7 +120,8 @@ async def handle_email_webhook(request: Request):
             if res.status_code == 200:
                 email_detail = res.json()
                 body = email_detail.get("text") or email_detail.get("html") or "No body received"
-
+    body = extract_latest_reply(body)
+    
     print(f"BODY:\n{body}")
 
     is_reply = bool(re.match(r"^re:\s*", subject, re.IGNORECASE))
