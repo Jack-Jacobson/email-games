@@ -24,9 +24,15 @@ def init_db():
             CREATE TABLE IF NOT EXISTS games (
                 player_email TEXT PRIMARY KEY,
                 board TEXT DEFAULT '_________',
-                status TEXT DEFAULT 'ACTIVE'
+                status TEXT DEFAULT 'ACTIVE',
+                difficulty INTEGER DEFAULT 0
             )
         """)
+        try:
+            con.execute("ALTER TABLE games ADD COLUMN difficulty INTEGER DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
+
         con.execute("""
             CREATE TABLE IF NOT EXISTS stats (
                 player_email TEXT PRIMARY KEY,
@@ -47,23 +53,26 @@ def get_or_create_game(email: str):
     with sqlite3.connect(DB_PATH) as con:
         cursor = con.cursor()
         # Trailing comma (email,) makes this a single-element tuple
-        cursor.execute("SELECT board, status FROM games WHERE player_email = ?", (email,))
+        cursor.execute("SELECT board, status, difficulty FROM games WHERE player_email = ?", (email,))
         row = cursor.fetchone()
 
         if not row or row[1] != 'ACTIVE':
             cursor.execute(
-                "INSERT OR REPLACE INTO games (player_email, board, status) VALUES (?, '_________', 'ACTIVE')",
+                "INSERT OR REPLACE INTO games (player_email, board, status, difficulty) VALUES (?, '_________', 'ACTIVE', 0)",
                 (email,)
             )
             con.commit()
-            return "_________", "ACTIVE"
-        return row[0], row[1]
+            return "_________", "ACTIVE", 0
+        return row[0], row[1], (row[2] if row[2] is not None else 0)
 
 
-def update_game(email: str, board: str, status: str = 'ACTIVE'):
+def update_game(email: str, board: str, status: str = 'ACTIVE', difficulty: int = 0):
     """Update board states in db"""
     with sqlite3.connect(DB_PATH) as con:
-        con.execute("UPDATE games SET board = ?, status = ? WHERE player_email = ?", (board, status, email))
+        con.execute(
+            "UPDATE games SET board = ?, status = ?, difficulty = ? WHERE player_email = ?",
+            (board, status, difficulty, email)
+        )
         con.commit()
 
 
@@ -165,7 +174,7 @@ def get_bot_move(board: str, difficulty: int = 1):
     empty_indexes = [i for i, char in enumerate(board) if char == "_"]
 
     #Random for level 1
-    if difficulty ==1:
+    if difficulty == 1:
         return random.choice(empty_indexes)
 
     # Will alwayss win or block, otherwise random for level 2
