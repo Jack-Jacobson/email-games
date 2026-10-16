@@ -3,7 +3,7 @@ import os
 import sqlite3
 import random
 
-DATA_DIR = "/app/data"
+DATA_DIR = os.environ.get("DATA_DIR", os.path.join(os.path.dirname(__file__), "data"))
 os.makedirs(DATA_DIR, exist_ok=True)
 DB_PATH = os.path.join(DATA_DIR, "games.db")
 
@@ -210,4 +210,83 @@ def format_board(board: str):
         f"B    {b[3]} | {b[4]} | {b[5]}\n"
         f"    ---+---+---\n"
         f"C    {b[6]} | {b[7]} | {b[8]}\n"
+    )
+
+def process_ttt_move(email: str, body: str):
+    """Process a tic-tac-toe difficulty selection and move"""
+    board, status, difficulty = get_or_create_game(email)
+    has_move = re.search(r"\b([A-Ca-c][1-3])\b", body)
+    level_match = re.search(r"\b(?:LEVEL\s*([1-3])|(EASY|MEDIUM|HARD))\b", body, re.IGNORECASE)
+
+    if level_match:
+        if level_match.group(1):
+            difficulty = int(level_match.group(1))
+        else:
+            word = level_match.group(2).upper()
+            difficulty = {"EASY": 1, "MEDIUM": 2, "HARD": 3}[word]
+
+        board = "_________"
+        update_game(email, board, status="ACTIVE", difficulty=difficulty)
+        if not has_move:
+            return(
+                f"Tic-Tac-Toe difficulty set to Level {difficulty}!\n\n"
+                f"{format_board(board)}\n"
+                f"Reply with coordinates (A1-C3) to make your first move."
+            )
+        
+    if difficulty not in (1, 2, 3):
+        return (
+            f"Welcome to Tic-Tac-Toe!\n\n"
+            f"Before starting, please select a difficulty level by replying with:\n"
+            f"- LEVEL 1 (or EASY)\n"
+            f"- LEVEL 2 (or MEDIUM)\n"
+            f"- LEVEL 3 (or HARD)\n"
+        )
+
+    if not has_move:
+        return(
+            f"Welcome to Play-by-Email Games!\n\n"
+            f"Current Difficulty: Level {difficulty}\n"
+            f"To play Tic-Tac-Toe, reply with coordinates (e.g. A1, B2) or 'LEVEL 1-3' to change difficulty.\n"
+            f"To play Minesweeper, put 'Minesweeper' in the subject or reply 'Minesweeper'.\n\n"
+            f"Current Tic-Tac-Toe Board:\n\n{format_board(board)}" 
+        )
+
+    user_move = has_move.group(1).upper()
+    idx = MOVE_MAP[user_move]
+
+    if board[idx] != "_":
+        return f"Position {user_move} is taken! Pick a different move.\n{format_board(board)}"
+
+    board_list = list(board)
+    board_list[idx] = "X"
+    board = "".join(board_list)
+    winner = check_winner(board)
+    if winner == 'X':
+        update_game(email, board, status="WON", difficulty=difficulty)
+        record_stat(email, "WON")
+        return f"Congrats! You won!\n\n{format_board(board)}\n\nReply with LEVEL 1, LEVEL 2, or LEVEL 3 to start a new game."
+
+    if winner == 'DRAW':
+        update_game(email, board, status="DRAW", difficulty=difficulty)
+        record_stat(email, "DRAW")
+        return f"It's a draw!\n\n{format_board(board)}\n\nReply with LEVEL 1, LEVEL 2, or LEVEL 3 to start a new game."
+
+    bot_index = get_bot_move(board, difficulty)
+    board_list[bot_index] = 'O'
+    board = "".join(board_list)
+
+    winner = check_winner(board)
+    if winner == 'O':
+        update_game(email, board, status="LOST", difficulty=difficulty)
+        record_stat(email, "LOST")
+        return f"The bot won!\n\n{format_board(board)}\n\nReply with LEVEL 1, LEVEL 2, or LEVEL 3 to start a new game."
+
+    update_game(email, board, status="ACTIVE", difficulty=difficulty)
+    bot_coord = list(MOVE_MAP.keys())[list(MOVE_MAP.values()).index(bot_index)]
+
+    return (
+        f"You played {user_move}. Bot played {bot_coord}.\n\n"
+        f"{format_board(board)}\n\n"
+        f"Your turn! Reply with your next move."
     )

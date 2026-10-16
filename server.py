@@ -4,7 +4,6 @@ import httpx
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-import random
 import html
 import time
 
@@ -61,6 +60,17 @@ async def send_email_reply(to_address: str, subject: str, text_content: str, mes
       <pre style="font-family: 'Courier New', Courier, monospace; margin: 0; white-space: pre;">{html_body}</pre>
     </div>
     """
+
+    print(
+        "DEBUG outgoing email payload:\n"
+        f"  from: {SENDER}\n"
+        f"  to: {[to_address]}\n"
+        f"  subject: {reply_subject}\n"
+        f"  text: {clean_text}\n"
+        f"  html: {html_content}\n"
+        f"  headers: {headers}\n"
+        f"  message_id: {message_id}"
+    )
     
     async with httpx.AsyncClient() as client:
         res = await client.post(
@@ -158,96 +168,6 @@ async def handle_email_webhook(request: Request):
     # Default to Tic-Tac-Toe
     print("Using tic tac toe logic")
 
-    board, status, difficulty = tictactoe.get_or_create_game(sender)
-    has_move = re.search(r"\b([A-Ca-c][1-3])\b", body)
-    level_match = re.search(r"\b(?:LEVEL\s*([1-3])|(EASY|MEDIUM|HARD))\b", body, re.IGNORECASE)
-
-    if level_match:
-        if level_match.group(1):
-            difficulty = int(level_match.group(1))
-        else:
-            word = level_match.group(2).upper()
-            difficulty = {"EASY": 1, "MEDIUM": 2, "HARD": 3}[word]
-
-        board = "_________"
-        tictactoe.update_game(sender, board, status="ACTIVE", difficulty=difficulty)
-        if not has_move:
-            reply_msg = (
-                f"Tic-Tac-Toe difficulty set to Level {difficulty}!\n\n"
-                f"{tictactoe.format_board(board)}\n"
-                f"Reply with coordinates (A1-C3) to make your first move."
-            )
-            await send_email_reply(sender, subject, reply_msg, message_id)
-            return {"status": "success"}
-
-    if difficulty not in (1, 2, 3):
-        reply_msg = (
-            f"Welcome to Tic-Tac-Toe!\n\n"
-            f"Before starting, please select a difficulty level by replying with:\n"
-            f"- LEVEL 1 (or EASY)\n"
-            f"- LEVEL 2 (or MEDIUM)\n"
-            f"- LEVEL 3 (or HARD)\n"
-        )
-        await send_email_reply(sender, subject, reply_msg, message_id)
-        return {"status": "success"}
-
-    if not has_move:
-        reply_msg = (
-            f"Welcome to Play-by-Email Games!\n\n"
-            f"Current Difficulty: Level {difficulty}\n"
-            f"To play Tic-Tac-Toe, reply with coordinates (e.g. A1, B2) or 'LEVEL 1-3' to change difficulty.\n"
-            f"To play Minesweeper, put 'Minesweeper' in the subject or reply 'Minesweeper'.\n\n"
-            f"Current Tic-Tac-Toe Board:\n\n{tictactoe.format_board(board)}"
-        )
-        await send_email_reply(sender, subject, reply_msg, message_id)
-        return {"status": "success"}
-
-    user_move = has_move.group(1).upper()
-    idx = tictactoe.MOVE_MAP[user_move]
-
-    if board[idx] != "_":
-        reply_msg = f"Position {user_move} is already taken!\n\n{tictactoe.format_board(board)}"
-        await send_email_reply(sender, subject, reply_msg, message_id)
-        return {"status": "success"}
-
-    board_list = list(board)
-    board_list[idx] = "X"
-    board = "".join(board_list)
-
-    winner = tictactoe.check_winner(board)
-    if winner == 'X':
-        tictactoe.update_game(sender, board, status="WON", difficulty=difficulty)
-        tictactoe.record_stat(sender, "WON")
-        msg = f"Congrats! You won!\n\n{tictactoe.format_board(board)}\n\nReply with LEVEL 1, LEVEL 2, or LEVEL 3 to start a new game."
-        await send_email_reply(sender, subject, msg, message_id)
-        return {"status": "success"}
-
-    if winner == 'DRAW':
-        tictactoe.update_game(sender, board, status="DRAW", difficulty=difficulty)
-        tictactoe.record_stat(sender, "DRAW")
-        msg = f"It's a draw!\n\n{tictactoe.format_board(board)}\n\nReply with LEVEL 1, LEVEL 2, or LEVEL 3 to start a new game."
-        await send_email_reply(sender, subject, msg, message_id)
-        return {"status": "success"}
-
-    bot_index = tictactoe.get_bot_move(board, difficulty)
-    board_list[bot_index] = 'O'
-    board = "".join(board_list)
-
-    winner = tictactoe.check_winner(board)
-    if winner == 'O':
-        tictactoe.update_game(sender, board, status="LOST", difficulty=difficulty)
-        tictactoe.record_stat(sender, "LOST")
-        msg = f"The bot won!\n\n{tictactoe.format_board(board)}\n\nReply with LEVEL 1, LEVEL 2, or LEVEL 3 to start a new game."
-        await send_email_reply(sender, subject, msg, message_id)
-        return {"status": "success"}
-
-    tictactoe.update_game(sender, board, status="ACTIVE", difficulty=difficulty)
-    bot_coord = list(tictactoe.MOVE_MAP.keys())[list(tictactoe.MOVE_MAP.values()).index(bot_index)]
-
-    reply_msg = (
-        f"You played {user_move}. Bot played {bot_coord}.\n\n"
-        f"{tictactoe.format_board(board)}\n\n"
-        f"Your turn! Reply with your next move."
-    )
+    reply_msg = tictactoe.process_ttt_move(sender, body)
     await send_email_reply(sender, subject, reply_msg, message_id)
     return {"status": "success"}

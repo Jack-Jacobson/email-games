@@ -194,62 +194,62 @@ def process_ms_move(email: str, body_text: str) -> str:
     mines, state, status, is_first_move = get_or_create_ms_game(email)
     state_list = list(state)
 
-    flag_match = re.search(r"\b(?:FLAG|F)\s*([A-Ea-e][1-5])\b", body_text, re.IGNORECASE)
-    if flag_match:
-        coord = flag_match.group(1).upper()
+    actions = re.findall(r"\b(FLAG|F)?\s*([A-Ea-e][1-5])\b", body_text, re.IGNORECASE)
+    if not actions:
+        return (
+            f"Welcome to Email Minesweeper!\n\n"
+            f"Commands:\n"
+            f"- Reply with one or more coordinates to reveal (e.g. A1, B3 C4)\n"
+            f"- Reply 'FLAG A1' or 'F A1' to flag a mine\n"
+            f"- Reply 'NEW' to restart\n\n"
+            f"Current Board:\n\n{format_ms_board(state)}"
+        )
+
+    messages = []
+    for action_type, raw_coord in actions:
+        coord = raw_coord.upper()
         r = ROW_LABELS.index(coord[0])
         c = int(coord[1]) - 1
         idx = r * GRID_COLS + c
 
-        if state_list[idx] not in ("_", "F"):
-            return f"Cell {coord} is already revealed!\n\n{format_ms_board(''.join(state_list))}"
+        if action_type:
+            if state_list[idx] not in ("_", "F"):
+                messages.append(f"Cell {coord} is already revealed.")
+            else:
+                state_list[idx] = "F" if state_list[idx] == "_" else "_"
+                messages.append(f"Flag toggled at {coord}.")
+        else:
+            if is_first_move:
+                if mines[idx] == "1":
+                    mines = generate_mines(exclude_idx=idx)
+                is_first_move = 0
 
-        state_list[idx] = "F" if state_list[idx] == "_" else "_"
-        new_state = "".join(state_list)
-        update_ms_game(email, mines, new_state, status="ACTIVE", first_move=is_first_move)
-        return f"Flag toggled at {coord}.\n\n{format_ms_board(new_state)}"
+            if mines[idx] == "1":
+                new_state = "".join(state_list)
+                update_ms_game(email, mines, new_state, status="LOST", first_move=0)
+                record_ms_stat(email, "LOST")
+                final_board = format_ms_board(new_state, reveal_all_mines=True, mines=mines)
+                messages.append(f"You hit a mine at {coord}!")
+                summary = " ".join(messages)
+                return f"{summary}\n\n{final_board}\nReply 'NEW' to play again."
 
-    move_match = re.search(r"\b([A-Ea-e][1-5])\b", body_text)
-    if not move_match:
-        return (
-            f"Welcome to Email Minesweeper!\n\n"
-            f"Commands:\n"
-            f"• Reply with coordinates to reveal (e.g. A1, B3)\n"
-            f"• Reply 'FLAG A1' or 'F A1' to flag a mine\n"
-            f"• Reply 'NEW' to restart\n\n"
-            f"Current Board:\n\n{format_ms_board(state)}"
-        )
+            cascade_reveal(idx, state_list, mines)
+            messages.append(f"Revealed {coord}.")
 
-    coord = move_match.group(1).upper()
-    r = ROW_LABELS.index(coord[0])
-    c = int(coord[1]) - 1
-    idx = r * GRID_COLS + c
-
-    if is_first_move and mines[idx] == "1":
-        mines = generate_mines(exclude_idx=idx)
-        is_first_move = 0
-
-    if mines[idx] == "1":
-        update_ms_game(email, mines, state, status="LOST", first_move=0)
-        record_ms_stat(email, "LOST")
-        final_board = format_ms_board(state, reveal_all_mines=True, mines=mines)
-        return f"You hit a mine at {coord}!\n\n{final_board}\nReply 'NEW' to play again."
-
-    cascade_reveal(idx, state_list, mines)
     new_state = "".join(state_list)
-
     unrevealed_non_mines = sum(
         1 for i in range(GRID_ROWS * GRID_COLS)
         if mines[i] == "0" and new_state[i] in ("_", "F")
     )
 
+    summary = " ".join(messages)
     if unrevealed_non_mines == 0:
         update_ms_game(email, mines, new_state, status="WON", first_move=0)
         record_ms_stat(email, "WON")
-        return f"You cleared all the mines! YOU WIN!\n\n{format_ms_board(new_state)}\nReply 'NEW' to play again."
+        return f"{summary}\nYou cleared all the mines! YOU WIN!\n\n{format_ms_board(new_state)}\nReply 'NEW' to play again."
 
-    update_ms_game(email, mines, new_state, status="ACTIVE", first_move=0)
-    return f"Revealed {coord}.\n\n{format_ms_board(new_state)}"
+    update_ms_game(email, mines, new_state, status="ACTIVE", first_move=is_first_move)
+    return f"{summary}\n\n{format_ms_board(new_state)}"
 
 
 def get_all_ms_stats():
